@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Blog Tiếng Anh</string>
     <string name="title_post_detail">Post Detail</string>
+    <plurals name="number_of_new_posts">
+        <item quantity="one">One new post</item>
+        <item quantity="other">%d new posts</item>
+    </plurals>
 </resources>

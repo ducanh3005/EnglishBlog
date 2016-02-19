@@ -2,13 +2,15 @@ package com.tune.englishblog;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-
-import com.tune.englishblog.dummy.DummyContent;
+import com.couchbase.lite.Document;
+import com.tune.englishblog.services.PostsSynchronizerService;
+import com.tune.englishblog.util.CBHelper;
 
 /**
  * A fragment representing a single Post detail screen.
@@ -26,7 +28,7 @@ public class PostDetailFragment extends Fragment {
     /**
      * The dummy content this fragment is presenting.
      */
-    private DummyContent.DummyItem mItem;
+    private Document mItem;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -38,23 +40,28 @@ public class PostDetailFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        try{
+            CBHelper cbHelper = new CBHelper(getActivity().getApplicationContext());
 
-        if (getArguments().containsKey(ARG_ITEM_ID)) {
-            // Load the dummy content specified by the fragment
-            // arguments. In a real-world scenario, use a Loader
-            // to load content from a content provider.
-            mItem = DummyContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
+            if (getArguments().containsKey(ARG_ITEM_ID)) {
+                // Load the dummy content specified by the fragment
+                // arguments. In a real-world scenario, use a Loader
+                // to load content from a content provider.
+                mItem = cbHelper.getDatabaseInstance().getDocument((getArguments().getString(ARG_ITEM_ID)));
+            }
+        }
+        catch(Exception e){
+            Log.d(getClass().getName(), e.getMessage());
         }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_post_detail, container, false);
 
         // Show the dummy content as text in a TextView.
         if (mItem != null) {
-            ((TextView) rootView.findViewById(R.id.post_detail)).setText(mItem.content);
+            ((TextView) rootView.findViewById(R.id.post_detail)).setText((String) mItem.getProperty(PostsSynchronizerService.POST_KEY_CONTENT));
         }
 
         return rootView;

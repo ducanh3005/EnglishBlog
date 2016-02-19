@@ -26,6 +26,18 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".PostListActivity" />
         </activity>
+
+        <service
+            android:name=".services.PostsSynchronizerService"
+            android:exported="false" >
+        </service>
+
+        <receiver android:name=".receiver.ConnectionChangeReceiver">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".services.RefreshService$RefreshAlarmReceiver"/>
     </application>
 
 </manifest>

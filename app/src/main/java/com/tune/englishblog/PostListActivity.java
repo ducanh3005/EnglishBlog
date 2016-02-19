@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 
+import com.tune.englishblog.services.RefreshService;
+
 
 /**
  * An activity representing a list of Posts. This activity
@@ -35,6 +37,8 @@ public class PostListActivity extends FragmentActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post_list);
 
+        RefreshService.startAutoRefreshService(this);
+
         if (findViewById(R.id.post_detail_container) != null) {
             // The detail container view will be present only in the
             // large-screen layouts (res/values-large and
@@ -48,14 +52,13 @@ public class PostListActivity extends FragmentActivity
                     .findFragmentById(R.id.post_list))
                     .setActivateOnItemClick(true);
         }
-
-        // TODO: If exposing deep links into your app, handle intents here.
     }
 
     /**
      * Callback method from {@link PostListFragment.Callbacks}
      * indicating that the item with the given ID was selected.
      */
+
     @Override
     public void onItemSelected(String id) {
         if (mTwoPane) {

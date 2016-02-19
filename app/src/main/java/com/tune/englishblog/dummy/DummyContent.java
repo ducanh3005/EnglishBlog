@@ -1,7 +1,5 @@
 package com.tune.englishblog.dummy;
 
-import com.tune.englishblog.services.PostsSynchronizer;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,10 +25,8 @@ public class DummyContent {
 
     static {
         // Add 3 sample items.
-        PostsSynchronizer synchronizer = new PostsSynchronizer();
-        int i = 1;
-        for(String title : synchronizer.pullAllPosts()){
-            addItem(new DummyItem(""+i++, title));
+        for(int i =1;i<100;i++){
+            addItem(new DummyItem(""+i, "Content "+i));
         }
     }
 
