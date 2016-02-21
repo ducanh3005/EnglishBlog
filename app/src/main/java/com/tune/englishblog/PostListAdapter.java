@@ -5,9 +5,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.couchbase.lite.Document;
+import com.squareup.picasso.Picasso;
+import com.tune.englishblog.services.PostsSynchronizerService;
 import com.tune.englishblog.util.CBHelper;
 
 import java.util.List;
@@ -26,6 +29,12 @@ public class PostListAdapter extends ArrayAdapter<Document> {
         this.addAll(postList = new CBHelper(context).getAllPosts());
     }
 
+    public void reloadAllPosts(Context context){
+        this.clear();
+        this.addAll(postList = new CBHelper(context).getAllPosts());
+        this.notifyDataSetChanged();
+    }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
@@ -34,8 +43,10 @@ public class PostListAdapter extends ArrayAdapter<Document> {
 
         Document post = getItem(position);
         TextView tvTitle = (TextView) convertView.findViewById(android.R.id.text1);
-//        tvTitle.setText((String) post.getProperty(PostsSynchronizerService.POST_KEY_TITLE));
-        tvTitle.setText((String) post.getId());
+        tvTitle.setText((String) post.getProperty(PostsSynchronizerService.POST_KEY_TITLE));
+        ImageView ivIcon = (ImageView) convertView.findViewById(R.id.icon);
+        Picasso.with(getContext()).load((String) post.getProperty(PostsSynchronizerService.POST_KEY_ICON)).into(ivIcon);
+
         return convertView;
     }
 

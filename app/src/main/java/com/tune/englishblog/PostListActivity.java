@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 
-import com.tune.englishblog.services.RefreshService;
-
 
 /**
  * An activity representing a list of Posts. This activity
@@ -37,7 +35,7 @@ public class PostListActivity extends FragmentActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post_list);
 
-        RefreshService.startAutoRefreshService(this);
+//        PostsSynchronizerService.startActionSyncPosts(this);
 
         if (findViewById(R.id.post_detail_container) != null) {
             // The detail container view will be present only in the

@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.TextView;
 
 /**
  * A list fragment representing a list of Posts. This fragment
@@ -34,6 +33,8 @@ public class PostListFragment extends ListFragment {
      * The current activated item position. Only used on tablets.
      */
     private int mActivatedPosition = ListView.INVALID_POSITION;
+
+    private PostListAdapter postListAdapter;
 
     /**
      * A callback interface that all activities containing this fragment must
@@ -69,7 +70,7 @@ public class PostListFragment extends ListFragment {
         super.onCreate(savedInstanceState);
 
         // Set Adapter for the Post List View
-        setListAdapter(new PostListAdapter(getActivity(), android.R.layout.simple_list_item_activated_1));
+        setListAdapter(postListAdapter = new PostListAdapter(getActivity(), R.layout.item_post_list));
     }
 
     @Override
@@ -107,10 +108,12 @@ public class PostListFragment extends ListFragment {
     public void onListItemClick(ListView listView, View view, int position, long id) {
         super.onListItemClick(listView, view, position, id);
 
+        // Store the position
+        mActivatedPosition = position;
+
         // Notify the active callbacks interface (the activity, if the
         // fragment is attached to one) that an item has been selected.
-
-        mCallbacks.onItemSelected((String) ((TextView)view).getText());
+        mCallbacks.onItemSelected(postListAdapter.getItem(position).getId());
     }
 
     @Override

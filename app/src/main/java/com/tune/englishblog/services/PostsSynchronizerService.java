@@ -7,6 +7,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 
 import com.couchbase.lite.Status;
@@ -34,13 +36,6 @@ public class PostsSynchronizerService extends IntentService {
     // TODO: Rename parameters
     private static final String EXTRA_PARAM1 = "com.tune.englishblog.services.extra.PARAM1";
     private static final String EXTRA_PARAM2 = "com.tune.englishblog.services.extra.PARAM2";
-
-    private Context context;
-
-    public PostsSynchronizerService(Context context){
-        super(PostsSynchronizerService.class.getName());
-        this.context = context;
-    }
 
     /**
      * Starts this service to perform action sync Posts with the given parameters. If
@@ -78,7 +73,9 @@ public class PostsSynchronizerService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_SYNC_POSTS.equals(action)) {
-                showNotification(syncNewPosts());
+                if(isNetworkAvailable(getApplicationContext())){
+                    showNotification(syncNewPosts());
+                }
             } else if (ACTION_BAZ.equals(action)) {
                 final String param1 = intent.getStringExtra(EXTRA_PARAM1);
                 final String param2 = intent.getStringExtra(EXTRA_PARAM2);
@@ -87,16 +84,25 @@ public class PostsSynchronizerService extends IntentService {
         }
     }
 
+    public boolean isNetworkAvailable(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            return true;
+        }
+        return false;
+    }
+
     private void showNotification(Integer newCount) {
-        if(newCount > 0){
-            String text = getResources().getQuantityString(R.plurals.number_of_new_posts, newCount, newCount);
+        if(newCount >= 0){
+            String text = getResources().getString(R.string.number_of_new_posts, newCount);
 
             Intent notificationIntent = new Intent(getApplicationContext(), this.getClass());
             PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             Notification.Builder notifBuilder = new Notification.Builder(getApplicationContext())
                     .setContentIntent(contentIntent)
-//                .setSmallIcon(R.drawable.ic_statusbar_rss)
+                    .setSmallIcon(R.drawable.notification_template_icon_bg)
                     .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
                     .setTicker(text)
                     .setWhen(System.currentTimeMillis())
@@ -106,7 +112,7 @@ public class PostsSynchronizerService extends IntentService {
                     .setLights(0xffffffff, 0, 0);
 
             NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.notify(0, notifBuilder.getNotification());
+            notificationManager.notify(0, notifBuilder.build());
         }
     }
 
@@ -124,47 +130,76 @@ public class PostsSynchronizerService extends IntentService {
     private static final String POSTS_URL = "http://vnexpress.net/tin-tuc/giao-duc/hoc-tieng-anh/page/";
     public static final String POST_KEY_TITLE   = "title";
     public static final String POST_KEY_CONTENT = "content";
+    public static final String POST_KEY_ICON = "icon";
     private static final String CSS_TITLE_LINK = ".list_news .title_news a.txt_link";
+    private static final String CSS_TITLE_LINK_P2 = "a[href=\"%s\"]";
     private static final String CSS_CONTENT_TITLE  = ".title_news h1";
     private static final String CSS_CONTENT_INTRO = ".short_intro";
-    private static final String CSS_CONTENT_MAIN  = ".fck_detail";
+    private static final String CSS_CONTENT_MAIN  = ".fck_detail,.block_content_slide_showdetail";
     private static final String CSS_CONTENT_EXCLUDE  = ".box_quangcao";
 
     private Integer syncNewPosts(){
         int count = 0;
-        int page = 36;
+        int page = 35;
+        int timeout = 20000;
         try{
-            while(true){
-                Connection.Response response = Jsoup.connect(POSTS_URL + page + ".html").execute();
+//            while(true){
+            while(page > 0){
+                Log.d(TAG, "Tune Page: "+page);
+                Connection.Response response = Jsoup.connect(POSTS_URL + page + ".html").timeout(timeout).execute();
                 if(response.statusCode() != Status.OK) return count; // Page not exist
-                else page++;
-
+                else page--;
+//                else page++;
                 CBHelper cbHelper = new CBHelper(getApplicationContext());
                 for(Element link : response.parse().body().select(CSS_TITLE_LINK)){
-                    String url = link.attr("href");
-                    String docID = StringUtils.substringBefore(StringUtils.substringAfterLast(url, "-"), ".html");
+                    try {
+                        String url = link.attr("href");
+                        String docID = StringUtils.substringBefore(StringUtils.substringAfterLast(url, "-"), ".html");
 
-                    Document detailPage = Jsoup.connect(url).get();
-                    Element elContent = detailPage.body().select(CSS_CONTENT_MAIN).first();
-                    // remove the ads
-                    elContent.getElementsByClass(CSS_CONTENT_EXCLUDE).remove();
-                    String content = detailPage.body().select(CSS_CONTENT_INTRO).html() + elContent.html();
-                    String title   = detailPage.body().select(CSS_CONTENT_TITLE).html();
+                        Document detailPage = Jsoup.connect(url).timeout(timeout).get();
+                        Log.d(TAG, detailPage.body().select(CSS_CONTENT_TITLE).html());
+                        Element elContent = detailPage.body().select(CSS_CONTENT_MAIN).first();
+                        Element elIcon = elContent.select("img").first();
+                        // remove the ads
+                        elContent.select(CSS_CONTENT_EXCLUDE).remove();
+                        // load second page
+                        String secondPageContent = "";
+                        Element secondPageLink = elContent.select(String.format(CSS_TITLE_LINK_P2, StringUtils.substringBeforeLast(url,".html")+"-p2.html")).first();
+                        if(secondPageLink != null) {
+                            Log.d(TAG, String.format(CSS_TITLE_LINK_P2, StringUtils.substringBeforeLast(url,".html")+"-p2.html"));
+                            Document docSecondPage = Jsoup.connect(secondPageLink.attr("href")).timeout(timeout).get();
+                            Element elContentSecond = docSecondPage.body().select(CSS_CONTENT_MAIN).first();
+                            if(elContentSecond != null){
+                                secondPageContent = elContentSecond.html();
+                                secondPageLink.remove();
+                            }
+                        }
 
-                    Log.d(TAG, title);
+                        String content = detailPage.body().select(CSS_CONTENT_INTRO).html() + elContent.html() + secondPageContent;
+                        String title   = detailPage.body().select(CSS_CONTENT_TITLE).html();
+                        String iconUrl = elIcon != null ? elIcon.attr("src") : null;
 
-                    if(cbHelper.getDatabaseInstance().getExistingDocument(docID) == null){
-                        com.couchbase.lite.Document document = cbHelper.getDatabaseInstance().getDocument(docID);
-                        document.putProperties(map(pair(POST_KEY_TITLE, (Object)title), pair(POST_KEY_CONTENT, (Object)content)));
-                        count++;
+                        if(cbHelper.getDatabaseInstance().getExistingDocument(docID) == null){
+                            com.couchbase.lite.Document document = cbHelper.getDatabaseInstance().getDocument(docID);
+                            document.putProperties(map(
+                                    pair(POST_KEY_TITLE, (Object)title),
+                                    pair(POST_KEY_CONTENT, (Object)content),
+                                    pair(POST_KEY_ICON, (Object)iconUrl)
+                            ));
+                            count++;
+                        }
+                        else return count; // Meet the latest existing Post
                     }
-                    else return count; // Meet the latest existing Post
+                    catch(Exception e){
+                        Log.d(TAG, "Unexpected Exception: " + e.getMessage(), e);
+                        return count;
+                    }
                 }
             }
         }
         catch(Exception e){
             Log.d(TAG, "Unexpected Exception: " + e.getMessage(), e);
-            return count;
         }
+        return count;
     }
 }

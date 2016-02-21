@@ -6,11 +6,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.webkit.WebView;
 
 import com.couchbase.lite.Document;
 import com.tune.englishblog.services.PostsSynchronizerService;
 import com.tune.englishblog.util.CBHelper;
+import com.tune.englishblog.util.Constants;
 
 /**
  * A fragment representing a single Post detail screen.
@@ -61,7 +62,13 @@ public class PostDetailFragment extends Fragment {
 
         // Show the dummy content as text in a TextView.
         if (mItem != null) {
-            ((TextView) rootView.findViewById(R.id.post_detail)).setText((String) mItem.getProperty(PostsSynchronizerService.POST_KEY_CONTENT));
+            String postContent = Constants.HTML_HEAD +
+                                Constants.TITLE_START +(String) mItem.getProperty(PostsSynchronizerService.POST_KEY_TITLE) + Constants.TITLE_END +
+                                (String) mItem.getProperty(PostsSynchronizerService.POST_KEY_CONTENT) +
+                                Constants.HTML_BODY_END;
+            WebView webView = ((WebView) rootView.findViewById(R.id.post_detail));
+            webView.getSettings().setJavaScriptEnabled(true);
+            webView.loadDataWithBaseURL("", postContent, Constants.MIME_TYPE, Constants.ENCODING, null);
         }
 
         return rootView;
