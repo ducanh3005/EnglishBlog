@@ -57,7 +57,7 @@ public class CBHelper {
                         fos.close();
                     }
                     this.getManagerInstance().replaceDatabase(DB_NAME, tmpDBPath);
-                    this.database = this.getManagerInstance().getDatabase(DB_NAME);
+                    this.database = this.getManagerInstance().getExistingDatabase(DB_NAME);
                 } finally {
                     zis.close();
                 }
@@ -77,6 +77,7 @@ public class CBHelper {
             List<com.couchbase.lite.Document> allDocs = new ArrayList<>();
             Query query = getDatabaseInstance().createAllDocumentsQuery();
             query.setAllDocsMode(Query.AllDocsMode.ALL_DOCS);
+            query.setDescending(true);
             QueryEnumerator result = query.run();
             for (Iterator<QueryRow> it = result; it.hasNext(); ) {
                 allDocs.add(it.next().getDocument());

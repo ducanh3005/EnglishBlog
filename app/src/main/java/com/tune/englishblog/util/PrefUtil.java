@@ -9,12 +9,14 @@ import android.preference.PreferenceManager;
  */
 public class PrefUtil {
 
-    public static Object get(Context context, String key, Object defValue) {
+    public static final String SHOW_READ = "show_read";
+
+    public static <T> T get(Context context, String key, T defValue) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        if(defValue instanceof Boolean) return settings.getBoolean(key, (boolean) defValue);
-        if(defValue instanceof Integer) return settings.getInt(key, (int) defValue);
-        if(defValue instanceof Long) return settings.getLong(key, (long) defValue);
-        if(defValue instanceof String) return settings.getString(key, (String) defValue);
+        if(defValue instanceof Boolean) return (T)(Boolean) settings.getBoolean(key, (Boolean) defValue);
+        if(defValue instanceof Integer) return (T)(Integer) settings.getInt(key, (Integer) defValue);
+        if(defValue instanceof Long) return (T)(Long) settings.getLong(key, (Long) defValue);
+        if(defValue instanceof String) return (T)(String) settings.getString(key, (String) defValue);
         else return null;
     }
 
@@ -31,5 +33,19 @@ public class PrefUtil {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         editor.remove(key);
         editor.apply();
+    }
+
+    public static void registerOnPrefChangeListener(Context context, SharedPreferences.OnSharedPreferenceChangeListener listener) {
+        try {
+            PreferenceManager.getDefaultSharedPreferences(context).registerOnSharedPreferenceChangeListener(listener);
+        } catch (Exception ignored) { // Seems to be possible to have a NPE here... Why??
+        }
+    }
+
+    public static void unregisterOnPrefChangeListener(Context context, SharedPreferences.OnSharedPreferenceChangeListener listener) {
+        try {
+            PreferenceManager.getDefaultSharedPreferences(context).unregisterOnSharedPreferenceChangeListener(listener);
+        } catch (Exception ignored) { // Seems to be possible to have a NPE here... Why??
+        }
     }
 }

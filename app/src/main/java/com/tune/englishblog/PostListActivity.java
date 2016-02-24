@@ -1,8 +1,15 @@
 package com.tune.englishblog;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.view.View;
+
+import com.melnykov.fab.FloatingActionButton;
+import com.tune.englishblog.services.PostsSynchronizerService;
+import com.tune.englishblog.util.PrefUtil;
+import com.tune.englishblog.util.UiUtils;
 
 
 /**
@@ -30,12 +37,16 @@ public class PostListActivity extends FragmentActivity
      */
     private boolean mTwoPane;
 
+    private FloatingActionButton mDrawerHideReadButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post_list);
 
-//        PostsSynchronizerService.startActionSyncPosts(this);
+        PostsSynchronizerService.startActionSyncPosts(this);
+
+        mDrawerHideReadButton = (FloatingActionButton) findViewById(R.id.hide_read_button);
 
         if (findViewById(R.id.post_detail_container) != null) {
             // The detail container view will be present only in the
@@ -78,5 +89,38 @@ public class PostListActivity extends FragmentActivity
             detailIntent.putExtra(PostDetailFragment.ARG_ITEM_ID, id);
             startActivity(detailIntent);
         }
+    }
+
+    public void onClickHideRead(View view) {
+        if (!PrefUtil.get(view.getContext(), PrefUtil.SHOW_READ, true)) {
+            PrefUtil.put(view.getContext(), PrefUtil.SHOW_READ, true);
+        } else {
+            PrefUtil.put(view.getContext(), PrefUtil.SHOW_READ, false);
+        }
+    }
+
+    private final SharedPreferences.OnSharedPreferenceChangeListener mShowReadListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (PrefUtil.SHOW_READ.equals(key)) {
+//                getLoaderManager().restartLoader(LOADER_ID, null, HomeActivity.this);
+
+                if (mDrawerHideReadButton != null) {
+                    UiUtils.updateHideReadButton(mDrawerHideReadButton);
+                }
+            }
+        }
+    };
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        PrefUtil.registerOnPrefChangeListener(this, mShowReadListener);
+    }
+
+    @Override
+    protected void onPause() {
+        PrefUtil.unregisterOnPrefChangeListener(this, mShowReadListener);
+        super.onPause();
     }
 }

@@ -2,4 +2,6 @@
     <string name="app_name">Học Tiếng Anh</string>
     <string name="title_post_detail">Details</string>
     <string name="number_of_new_posts">%d bài viết mới</string>
+    <string name="context_menu_hide_read">Ẩn bài đã đọc</string>
+    <string name="context_menu_show_read">Hiện bài đã đọc</string>
 </resources>

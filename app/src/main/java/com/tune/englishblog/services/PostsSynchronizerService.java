@@ -6,12 +6,12 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
 import com.couchbase.lite.Status;
+import com.tune.englishblog.PostListActivity;
 import com.tune.englishblog.R;
 import com.tune.englishblog.util.CBHelper;
 
@@ -97,13 +97,12 @@ public class PostsSynchronizerService extends IntentService {
         if(newCount >= 0){
             String text = getResources().getString(R.string.number_of_new_posts, newCount);
 
-            Intent notificationIntent = new Intent(getApplicationContext(), this.getClass());
+            Intent notificationIntent = new Intent(this, PostListActivity.class);
             PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            Notification.Builder notifBuilder = new Notification.Builder(getApplicationContext())
+            Notification.Builder notifyBuilder = new Notification.Builder(getApplicationContext())
                     .setContentIntent(contentIntent)
-                    .setSmallIcon(R.drawable.notification_template_icon_bg)
-                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+                    .setSmallIcon(R.mipmap.ic_launcher)
                     .setTicker(text)
                     .setWhen(System.currentTimeMillis())
                     .setAutoCancel(true)
@@ -112,7 +111,7 @@ public class PostsSynchronizerService extends IntentService {
                     .setLights(0xffffffff, 0, 0);
 
             NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.notify(0, notifBuilder.build());
+            notificationManager.notify(0, notifyBuilder.build());
         }
     }
 
@@ -140,16 +139,14 @@ public class PostsSynchronizerService extends IntentService {
 
     private Integer syncNewPosts(){
         int count = 0;
-        int page = 35;
+        int page = 1;
         int timeout = 20000;
         try{
-//            while(true){
-            while(page > 0){
+            while(true){
                 Log.d(TAG, "Tune Page: "+page);
                 Connection.Response response = Jsoup.connect(POSTS_URL + page + ".html").timeout(timeout).execute();
                 if(response.statusCode() != Status.OK) return count; // Page not exist
-                else page--;
-//                else page++;
+                else page++;
                 CBHelper cbHelper = new CBHelper(getApplicationContext());
                 for(Element link : response.parse().body().select(CSS_TITLE_LINK)){
                     try {
