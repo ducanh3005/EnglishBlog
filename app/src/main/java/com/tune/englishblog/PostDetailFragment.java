@@ -60,7 +60,7 @@ public class PostDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_post_detail, container, false);
 
-        // Show the dummy content as text in a TextView.
+        // Show the content to WebView
         if (mItem != null) {
             String postContent = Constants.HTML_HEAD +
                                 Constants.TITLE_START +(String) mItem.getProperty(PostsSynchronizerService.POST_KEY_TITLE) + Constants.TITLE_END +

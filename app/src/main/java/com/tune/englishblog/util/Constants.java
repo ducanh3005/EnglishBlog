@@ -25,17 +25,14 @@ public interface Constants {
             + ".item_answare_ama a{color: #333!important;text-decoration: none;}"
             + "</style><meta name='viewport' content='width=device-width'/>"
             + "<link href='http://st.f3.vnecdn.net/responsive/c/v54/giaoduc.css' media='all' rel='stylesheet' type='text/css' />"
-//            + "<link rel='stylesheet' href='http://st.f3.vnecdn.net/responsive/c/v54/general.css' media='all' />"
             + "</head><body>";
     public static final String HTML_BODY_END =
-            "</body><script language='javascript' type='text/javascript'> var interactions_url = 'http://usi.saas.vnexpress.net';" +
-               " var base_url = 'http://vnexpress.net'; var css_url = 'http://st.f3.vnecdn.net/responsive/c/v54';" +
-               " var js_url = 'http://st.f2.vnecdn.net/responsive/j/v5'; var flash_url = 'http://st.f4.vnecdn.net/responsive/f/v19';" +
-               " var img_url = 'http://st.f1.vnecdn.net/responsive/i/v24'; var image_cloud = 'http://l.f29.img.vnecdn.net';" +
-               " var PageHot = 0; var device_env = 4; var site_id = 1000000; var SITE_ID =  1000000; var PAGE_FOLDER =  1003698; var PAGE_DETAIL = 1;" +
-            "</script>"
+            "</body>"
+            + "<script type='text/javascript'> var interactions_url = 'http://usi.saas.vnexpress.net'; var base_url = 'http://vnexpress.net'; var css_url = 'http://st.f3.vnecdn.net/responsive/c/v54'; var js_url = 'http://st.f2.vnecdn.net/responsive/j/v5'; var flash_url = 'http://st.f4.vnecdn.net/responsive/f/v19'; var img_url = 'http://st.f1.vnecdn.net/responsive/i/v24'; var image_cloud = 'http://l.f29.img.vnecdn.net'; var PageHot = 0; var device_env = 4; var site_id = 1000000; var SITE_ID =  1000000; var PAGE_FOLDER =  1003698; var PAGE_DETAIL = 1;</script>"
             + "<script type='text/javascript' src='http://st.f2.vnecdn.net/responsive/libs/jquery-1.7.1.min.js'></script>"
             + "<script type='text/javascript' src='http://st.f2.vnecdn.net/responsive/j/v5/interactions/quiz.widget.js'></script>"
+            + "<script type='text/javascript' src='http://st.f2.vnecdn.net/responsive/j/v5/interactions/parser_v3.js'></script>"
+            + "<script type='text/javascript'>if($('div[data-component-type=\"video\"]')){$('.vne_video').each(function(key, val){var videoId = $(this).html().trim();var vneVideo = '<div style=\"text-align:center;\"><div class=\"vne_video\">'+videoId+'</div></div>';var parentDom = $(this).parent().get(0).tagName;var tableDom = $(this).parents('table');if(parentDom == 'TD' || parentDom == 'td'){tableDom.before(vneVideo).remove();}});Parser.SITE_URL = base_url;Parser.URL = js_url;Parser.FLASH_URL = flash_url;Parser.SITE_ID = site_id;Parser.AUTO_PLAY = 1;Parser.parseAll();}if($('.parser_player_vnexpress')) $('.parser_player_vnexpress').after('<div><a href=\"'+$('.parser_player_vnexpress').attr('src')+'\">Xem Video</a></div>');</script>"
             + "</html>";
     public static final String TITLE_START = "<h1>";
     public static final String TITLE_END = "</h1>";

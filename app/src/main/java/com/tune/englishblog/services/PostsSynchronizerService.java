@@ -134,7 +134,7 @@ public class PostsSynchronizerService extends IntentService {
     private static final String CSS_TITLE_LINK_P2 = "a[href=\"%s\"]";
     private static final String CSS_CONTENT_TITLE  = ".title_news h1";
     private static final String CSS_CONTENT_INTRO = ".short_intro";
-    private static final String CSS_CONTENT_MAIN  = ".fck_detail,.block_content_slide_showdetail";
+    private static final String CSS_CONTENT_MAIN  = ".fck_detail,#article_content";
     private static final String CSS_CONTENT_EXCLUDE  = ".box_quangcao";
 
     private Integer syncNewPosts(){
