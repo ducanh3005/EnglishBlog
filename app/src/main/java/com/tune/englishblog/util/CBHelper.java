@@ -37,6 +37,7 @@ public class CBHelper {
 
     public Database getDatabaseInstance() throws CouchbaseLiteException, IOException {
         if ((this.database == null)) {
+            // Init DB from existing DB
             this.database = this.getManagerInstance().getExistingDatabase(DB_NAME);
             if(this.database == null){
                 Log.d(this.getClass().getSimpleName(), "Copy init database at the first time run");
@@ -62,6 +63,9 @@ public class CBHelper {
                     zis.close();
                 }
             }
+
+            // Create new DB
+//            this.database = this.getManagerInstance().getDatabase(DB_NAME);
         }
         return database;
     }

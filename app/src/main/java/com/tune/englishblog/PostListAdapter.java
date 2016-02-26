@@ -13,6 +13,8 @@ import com.squareup.picasso.Picasso;
 import com.tune.englishblog.services.PostsSynchronizerService;
 import com.tune.englishblog.util.CBHelper;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
 
 /**
@@ -45,7 +47,7 @@ public class PostListAdapter extends ArrayAdapter<Document> {
         TextView tvTitle = (TextView) convertView.findViewById(android.R.id.text1);
         tvTitle.setText((String) post.getProperty(PostsSynchronizerService.POST_KEY_TITLE));
         ImageView ivIcon = (ImageView) convertView.findViewById(R.id.icon);
-        Picasso.with(getContext()).load((String) post.getProperty(PostsSynchronizerService.POST_KEY_ICON)).into(ivIcon);
+        Picasso.with(getContext()).load(StringUtils.trimToNull((String) post.getProperty(PostsSynchronizerService.POST_KEY_ICON))).into(ivIcon);
 
         return convertView;
     }

@@ -94,7 +94,7 @@ public class PostsSynchronizerService extends IntentService {
     }
 
     private void showNotification(Integer newCount) {
-        if(newCount >= 0){
+        if(newCount > 0){
             String text = getResources().getString(R.string.number_of_new_posts, newCount);
 
             Intent notificationIntent = new Intent(this, PostListActivity.class);
@@ -130,7 +130,9 @@ public class PostsSynchronizerService extends IntentService {
     public static final String POST_KEY_TITLE   = "title";
     public static final String POST_KEY_CONTENT = "content";
     public static final String POST_KEY_ICON = "icon";
-    private static final String CSS_TITLE_LINK = ".list_news .title_news a.txt_link";
+    private static final String CSS_WRAPPER = ".list_news .block_image_news";
+    private static final String CSS_TITLE_LINK = ".title_news a.txt_link";
+    private static final String CSS_ICON_IMG = ".thumb img";
     private static final String CSS_TITLE_LINK_P2 = "a[href=\"%s\"]";
     private static final String CSS_CONTENT_TITLE  = ".title_news h1";
     private static final String CSS_CONTENT_INTRO = ".short_intro";
@@ -140,23 +142,25 @@ public class PostsSynchronizerService extends IntentService {
     private Integer syncNewPosts(){
         int count = 0;
         int page = 1;
-        int timeout = 20000;
-        try{
-            while(true){
-                Log.d(TAG, "Tune Page: "+page);
+        int timeout = 10000;
+        while(true){
+            Log.d(TAG, "Tune Page: "+page);
+            try{
                 Connection.Response response = Jsoup.connect(POSTS_URL + page + ".html").timeout(timeout).execute();
                 if(response.statusCode() != Status.OK) return count; // Page not exist
                 else page++;
                 CBHelper cbHelper = new CBHelper(getApplicationContext());
-                for(Element link : response.parse().body().select(CSS_TITLE_LINK)){
+                for(Element wrapper : response.parse().body().select(CSS_WRAPPER)) {
                     try {
-                        String url = link.attr("href");
+                        String iconUrl = wrapper.select(CSS_ICON_IMG).attr("src");
+                        String url = wrapper.select(CSS_TITLE_LINK).attr("href");
                         String docID = StringUtils.substringBefore(StringUtils.substringAfterLast(url, "-"), ".html");
+
+                        if(cbHelper.getDatabaseInstance().getExistingDocument(docID) != null) return count; // Meet the latest existing Post
 
                         Document detailPage = Jsoup.connect(url).timeout(timeout).get();
                         Log.d(TAG, detailPage.body().select(CSS_CONTENT_TITLE).html());
                         Element elContent = detailPage.body().select(CSS_CONTENT_MAIN).first();
-                        Element elIcon = elContent.select("img").first();
                         // remove the ads
                         elContent.select(CSS_CONTENT_EXCLUDE).remove();
                         // load second page
@@ -174,7 +178,6 @@ public class PostsSynchronizerService extends IntentService {
 
                         String content = detailPage.body().select(CSS_CONTENT_INTRO).html() + elContent.html() + secondPageContent;
                         String title   = detailPage.body().select(CSS_CONTENT_TITLE).html();
-                        String iconUrl = elIcon != null ? elIcon.attr("src") : null;
 
                         if(cbHelper.getDatabaseInstance().getExistingDocument(docID) == null){
                             com.couchbase.lite.Document document = cbHelper.getDatabaseInstance().getDocument(docID);
@@ -185,18 +188,17 @@ public class PostsSynchronizerService extends IntentService {
                             ));
                             count++;
                         }
-                        else return count; // Meet the latest existing Post
                     }
                     catch(Exception e){
                         Log.d(TAG, "Unexpected Exception: " + e.getMessage(), e);
-                        return count;
                     }
                 }
             }
+            catch(Exception e){
+                Log.d(TAG, "Unexpected Exception: " + e.getMessage(), e);
+            }
         }
-        catch(Exception e){
-            Log.d(TAG, "Unexpected Exception: " + e.getMessage(), e);
-        }
-        return count;
+//        Log.d(TAG, "New posts: "+count);
+//        return count;
     }
 }
