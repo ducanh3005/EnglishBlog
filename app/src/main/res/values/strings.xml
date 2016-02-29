@@ -4,4 +4,5 @@
     <string name="number_of_new_posts">%d bài viết mới</string>
     <string name="context_menu_hide_read">Ẩn bài đã đọc</string>
     <string name="context_menu_show_read">Hiện bài đã đọc</string>
+    <string name="top_ad_unit_id" translatable="false">ca-app-pub-5326471241766080/1486323060</string>
 </resources>

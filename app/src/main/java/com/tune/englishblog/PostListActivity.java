@@ -1,15 +1,16 @@
 package com.tune.englishblog;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
+import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.melnykov.fab.FloatingActionButton;
 import com.tune.englishblog.services.PostsSynchronizerService;
 import com.tune.englishblog.util.PrefUtil;
-import com.tune.englishblog.util.UiUtils;
 
 
 /**
@@ -37,7 +38,7 @@ public class PostListActivity extends FragmentActivity
      */
     private boolean mTwoPane;
 
-    private FloatingActionButton mDrawerHideReadButton;
+    private FloatingActionButton drawerHideReadButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +47,13 @@ public class PostListActivity extends FragmentActivity
 
         PostsSynchronizerService.startActionSyncPosts(this);
 
-        mDrawerHideReadButton = (FloatingActionButton) findViewById(R.id.hide_read_button);
+        // Load AdMob
+        AdView mAdView = (AdView) findViewById(R.id.adTopView);
+        AdRequest adRequest = new AdRequest.Builder().addTestDevice("D8466940C49144F6336111363C348DCB").build();
+        mAdView.loadAd(adRequest);
+
+        // Show/Hide read posts
+        drawerHideReadButton = (FloatingActionButton) findViewById(R.id.hide_read_button);
 
         if (findViewById(R.id.post_detail_container) != null) {
             // The detail container view will be present only in the
@@ -91,36 +98,15 @@ public class PostListActivity extends FragmentActivity
         }
     }
 
-    public void onClickHideRead(View view) {
+    public void onClickShowHideRead(View view) {
         if (!PrefUtil.get(view.getContext(), PrefUtil.SHOW_READ, true)) {
             PrefUtil.put(view.getContext(), PrefUtil.SHOW_READ, true);
+            drawerHideReadButton.setColorNormalResId(R.color.color_primary);
+            Toast.makeText(this, R.string.context_menu_show_read, Toast.LENGTH_SHORT).show();
         } else {
             PrefUtil.put(view.getContext(), PrefUtil.SHOW_READ, false);
+            drawerHideReadButton.setColorNormalResId(R.color.floating_action_button_disabled);
+            Toast.makeText(this, R.string.context_menu_hide_read, Toast.LENGTH_SHORT).show();
         }
-    }
-
-    private final SharedPreferences.OnSharedPreferenceChangeListener mShowReadListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-        @Override
-        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            if (PrefUtil.SHOW_READ.equals(key)) {
-//                getLoaderManager().restartLoader(LOADER_ID, null, HomeActivity.this);
-
-                if (mDrawerHideReadButton != null) {
-                    UiUtils.updateHideReadButton(mDrawerHideReadButton);
-                }
-            }
-        }
-    };
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        PrefUtil.registerOnPrefChangeListener(this, mShowReadListener);
-    }
-
-    @Override
-    protected void onPause() {
-        PrefUtil.unregisterOnPrefChangeListener(this, mShowReadListener);
-        super.onPause();
     }
 }

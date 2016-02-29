@@ -18,4 +18,3 @@
 
 # for picasso
 -dontwarn com.squareup.okhttp.**
--dontwarn com.fasterxml.jackson.**

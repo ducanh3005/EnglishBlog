@@ -1,10 +1,13 @@
 package com.tune.englishblog;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.ListView;
+
+import com.tune.englishblog.util.PrefUtil;
 
 /**
  * A list fragment representing a list of Posts. This fragment
@@ -111,6 +114,12 @@ public class PostListFragment extends ListFragment {
         // Store the position
         mActivatedPosition = position;
 
+        // Reload the drawer to show/hide the items
+        if (postListAdapter != null) {
+            postListAdapter.setActivatePosition(position);
+            postListAdapter.reloadAllPosts(getActivity());
+        }
+
         // Notify the active callbacks interface (the activity, if the
         // fragment is attached to one) that an item has been selected.
         mCallbacks.onItemSelected(postListAdapter.getItem(position).getId());
@@ -145,5 +154,29 @@ public class PostListFragment extends ListFragment {
         }
 
         mActivatedPosition = position;
+    }
+
+    /*
+    * Show/Hide posts when Show/Hide Read button click
+     */
+    private final SharedPreferences.OnSharedPreferenceChangeListener mShowReadListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (PrefUtil.SHOW_READ.equals(key)) {
+                if (postListAdapter != null) postListAdapter.reloadAllPosts(getActivity());
+            }
+        }
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        PrefUtil.registerOnPrefChangeListener(getActivity(), mShowReadListener);
+    }
+
+    @Override
+    public void onPause() {
+        PrefUtil.unregisterOnPrefChangeListener(getActivity(), mShowReadListener);
+        super.onPause();
     }
 }

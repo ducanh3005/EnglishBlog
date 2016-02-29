@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 
 import com.couchbase.lite.Document;
-import com.tune.englishblog.services.PostsSynchronizerService;
 import com.tune.englishblog.util.CBHelper;
 import com.tune.englishblog.util.Constants;
 
@@ -31,6 +30,8 @@ public class PostDetailFragment extends Fragment {
      */
     private Document mItem;
 
+    private CBHelper cbHelper;
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -42,7 +43,7 @@ public class PostDetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try{
-            CBHelper cbHelper = new CBHelper(getActivity().getApplicationContext());
+            this.cbHelper = new CBHelper(getActivity().getApplicationContext());
 
             if (getArguments().containsKey(ARG_ITEM_ID)) {
                 // Load the dummy content specified by the fragment
@@ -63,12 +64,14 @@ public class PostDetailFragment extends Fragment {
         // Show the content to WebView
         if (mItem != null) {
             String postContent = Constants.HTML_HEAD +
-                                Constants.TITLE_START +(String) mItem.getProperty(PostsSynchronizerService.POST_KEY_TITLE) + Constants.TITLE_END +
-                                (String) mItem.getProperty(PostsSynchronizerService.POST_KEY_CONTENT) +
+                                Constants.TITLE_START +(String) mItem.getProperty(CBHelper.POST_KEY_TITLE) + Constants.TITLE_END +
+                                (String) mItem.getProperty(CBHelper.POST_KEY_CONTENT) +
                                 Constants.HTML_BODY_END;
             WebView webView = ((WebView) rootView.findViewById(R.id.post_detail));
             webView.getSettings().setJavaScriptEnabled(true);
             webView.loadDataWithBaseURL("", postContent, Constants.MIME_TYPE, Constants.ENCODING, null);
+
+            this.cbHelper.setPostRead(mItem.getId());
         }
 
         return rootView;

@@ -127,9 +127,6 @@ public class PostsSynchronizerService extends IntentService {
     ////////////// HTML crawler /////////////////////
     private static final String TAG = PostsSynchronizerService.class.getSimpleName();
     private static final String POSTS_URL = "http://vnexpress.net/tin-tuc/giao-duc/hoc-tieng-anh/page/";
-    public static final String POST_KEY_TITLE   = "title";
-    public static final String POST_KEY_CONTENT = "content";
-    public static final String POST_KEY_ICON = "icon";
     private static final String CSS_WRAPPER = ".list_news .block_image_news";
     private static final String CSS_TITLE_LINK = ".title_news a.txt_link";
     private static final String CSS_ICON_IMG = ".thumb img";
@@ -182,9 +179,9 @@ public class PostsSynchronizerService extends IntentService {
                         if(cbHelper.getDatabaseInstance().getExistingDocument(docID) == null){
                             com.couchbase.lite.Document document = cbHelper.getDatabaseInstance().getDocument(docID);
                             document.putProperties(map(
-                                    pair(POST_KEY_TITLE, (Object)title),
-                                    pair(POST_KEY_CONTENT, (Object)content),
-                                    pair(POST_KEY_ICON, (Object)iconUrl)
+                                    pair(CBHelper.POST_KEY_TITLE, (Object)title),
+                                    pair(CBHelper.POST_KEY_CONTENT, (Object)content),
+                                    pair(CBHelper.POST_KEY_ICON, (Object)iconUrl)
                             ));
                             count++;
                         }
